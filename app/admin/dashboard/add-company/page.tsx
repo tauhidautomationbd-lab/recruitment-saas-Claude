@@ -7,6 +7,13 @@ export default function AddCompanyPage() {
   const router = useRouter();
   const [companyName, setCompanyName] = useState("");
   const [subscriptionPlan, setSubscriptionPlan] = useState("trial");
+  const [contactEmail, setContactEmail] = useState("");
+  const [contactPhone, setContactPhone] = useState("");
+  const [subscriptionPrice, setSubscriptionPrice] = useState("");
+  const [subscriptionStartDate, setSubscriptionStartDate] = useState(
+    new Date().toISOString().slice(0, 10)
+  );
+  const [subscriptionEndDate, setSubscriptionEndDate] = useState("");
   const [hrFullName, setHrFullName] = useState("");
   const [hrEmail, setHrEmail] = useState("");
   const [hrPassword, setHrPassword] = useState("");
@@ -22,7 +29,18 @@ export default function AddCompanyPage() {
     const res = await fetch("/api/admin/create-company", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ companyName, subscriptionPlan, hrFullName, hrEmail, hrPassword }),
+      body: JSON.stringify({
+        companyName,
+        subscriptionPlan,
+        contactEmail,
+        contactPhone,
+        subscriptionPrice: subscriptionPrice ? Number(subscriptionPrice) : null,
+        subscriptionStartDate: subscriptionStartDate || null,
+        subscriptionEndDate: subscriptionEndDate || null,
+        hrFullName,
+        hrEmail,
+        hrPassword,
+      }),
     });
 
     const result = await res.json();
@@ -37,6 +55,8 @@ export default function AddCompanyPage() {
     setTimeout(() => router.push("/admin/dashboard"), 1500);
   }
 
+  const inputStyle = { width: "100%", padding: 10, borderRadius: 6, border: "1px solid #ccc", marginTop: 4 };
+
   return (
     <main style={{ padding: 40, maxWidth: 480, margin: "0 auto" }}>
       <h1 style={{ fontSize: 20, marginBottom: 20 }}>নতুন Company যোগ করুন</h1>
@@ -44,27 +64,60 @@ export default function AddCompanyPage() {
       <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 12 }}>
         <label>
           Company নাম
-          <input
-            value={companyName}
-            onChange={(e) => setCompanyName(e.target.value)}
-            required
-            style={{ width: "100%", padding: 10, borderRadius: 6, border: "1px solid #ccc", marginTop: 4 }}
-          />
+          <input value={companyName} onChange={(e) => setCompanyName(e.target.value)} required style={inputStyle} />
+        </label>
+
+        <label>
+          যোগাযোগের ইমেইল
+          <input type="email" value={contactEmail} onChange={(e) => setContactEmail(e.target.value)} style={inputStyle} />
+        </label>
+
+        <label>
+          যোগাযোগের ফোন
+          <input value={contactPhone} onChange={(e) => setContactPhone(e.target.value)} style={inputStyle} placeholder="01XXXXXXXXX" />
         </label>
 
         <label>
           Subscription Plan
-          <select
-            value={subscriptionPlan}
-            onChange={(e) => setSubscriptionPlan(e.target.value)}
-            style={{ width: "100%", padding: 10, borderRadius: 6, border: "1px solid #ccc", marginTop: 4 }}
-          >
+          <select value={subscriptionPlan} onChange={(e) => setSubscriptionPlan(e.target.value)} style={inputStyle}>
             <option value="trial">Trial</option>
             <option value="basic">Basic</option>
             <option value="pro">Pro</option>
             <option value="enterprise">Enterprise</option>
           </select>
         </label>
+
+        <label>
+          প্যাকেজের মূল্য (টাকা)
+          <input
+            type="number"
+            value={subscriptionPrice}
+            onChange={(e) => setSubscriptionPrice(e.target.value)}
+            style={inputStyle}
+            placeholder="যেমন 5000"
+          />
+        </label>
+
+        <div style={{ display: "flex", gap: 12 }}>
+          <label style={{ flex: 1 }}>
+            শুরুর তারিখ
+            <input
+              type="date"
+              value={subscriptionStartDate}
+              onChange={(e) => setSubscriptionStartDate(e.target.value)}
+              style={inputStyle}
+            />
+          </label>
+          <label style={{ flex: 1 }}>
+            শেষ হওয়ার তারিখ
+            <input
+              type="date"
+              value={subscriptionEndDate}
+              onChange={(e) => setSubscriptionEndDate(e.target.value)}
+              style={inputStyle}
+            />
+          </label>
+        </div>
 
         <hr style={{ margin: "8px 0", border: "none", borderTop: "1px solid #eee" }} />
         <p style={{ fontSize: 13, color: "#666", margin: 0 }}>
@@ -73,34 +126,17 @@ export default function AddCompanyPage() {
 
         <label>
           HR-এর নাম
-          <input
-            value={hrFullName}
-            onChange={(e) => setHrFullName(e.target.value)}
-            style={{ width: "100%", padding: 10, borderRadius: 6, border: "1px solid #ccc", marginTop: 4 }}
-          />
+          <input value={hrFullName} onChange={(e) => setHrFullName(e.target.value)} style={inputStyle} />
         </label>
 
         <label>
           HR-এর ইমেইল
-          <input
-            type="email"
-            value={hrEmail}
-            onChange={(e) => setHrEmail(e.target.value)}
-            required
-            style={{ width: "100%", padding: 10, borderRadius: 6, border: "1px solid #ccc", marginTop: 4 }}
-          />
+          <input type="email" value={hrEmail} onChange={(e) => setHrEmail(e.target.value)} required style={inputStyle} />
         </label>
 
         <label>
           সাময়িক পাসওয়ার্ড
-          <input
-            type="text"
-            value={hrPassword}
-            onChange={(e) => setHrPassword(e.target.value)}
-            required
-            minLength={6}
-            style={{ width: "100%", padding: 10, borderRadius: 6, border: "1px solid #ccc", marginTop: 4 }}
-          />
+          <input type="text" value={hrPassword} onChange={(e) => setHrPassword(e.target.value)} required minLength={6} style={inputStyle} />
         </label>
 
         {error && <p style={{ color: "red", fontSize: 14 }}>{error}</p>}

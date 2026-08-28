@@ -3,7 +3,6 @@ import { createSupabaseServerClient } from "@/lib/supabase-server";
 import { createSupabaseAdminClient } from "@/lib/supabase-admin";
 
 export async function POST(request: NextRequest) {
-  // ১. প্রথমে যাচাই করি যে যিনি call করছেন তিনি আসলেই লগইন করা super_admin কি না
   const supabase = createSupabaseServerClient();
   const {
     data: { user },
@@ -23,9 +22,19 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "শুধু Super Admin এই কাজ করতে পারবে" }, { status: 403 });
   }
 
-  // ২. ফর্ম থেকে আসা data নেওয়া
   const body = await request.json();
-  const { companyName, subscriptionPlan, hrFullName, hrEmail, hrPassword } = body;
+  const {
+    companyName,
+    subscriptionPlan,
+    contactEmail,
+    contactPhone,
+    subscriptionPrice,
+    subscriptionStartDate,
+    subscriptionEndDate,
+    hrFullName,
+    hrEmail,
+    hrPassword,
+  } = body;
 
   if (!companyName || !hrEmail || !hrPassword) {
     return NextResponse.json({ error: "companyName, hrEmail, hrPassword আবশ্যক" }, { status: 400 });
@@ -33,10 +42,17 @@ export async function POST(request: NextRequest) {
 
   const admin = createSupabaseAdminClient();
 
-  // ৩. কোম্পানি তৈরি (RLS bypass করার জন্য service-role client ব্যবহার হচ্ছে)
   const { data: company, error: companyError } = await admin
     .from("companies")
-    .insert({ name: companyName, subscription_plan: subscriptionPlan || "trial" })
+    .insert({
+      name: companyName,
+      subscription_plan: subscriptionPlan || "trial",
+      contact_email: contactEmail || null,
+      contact_phone: contactPhone || null,
+      subscription_price: subscriptionPrice || null,
+      subscription_start_date: subscriptionStartDate || null,
+      subscription_end_date: subscriptionEndDate || null,
+    })
     .select()
     .single();
 
@@ -44,7 +60,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: `Company তৈরি ব্যর্থ: ${companyError.message}` }, { status: 500 });
   }
 
-  // ৪. HR admin ইউজার তৈরি (Supabase Auth Admin API দিয়ে)
   const { data: newUser, error: userError } = await admin.auth.admin.createUser({
     email: hrEmail,
     password: hrPassword,
@@ -57,7 +72,6 @@ export async function POST(request: NextRequest) {
   });
 
   if (userError) {
-    // user তৈরি ব্যর্থ হলে company-টাও মুছে দিচ্ছি, যাতে অসম্পূর্ণ data না থাকে
     await admin.from("companies").delete().eq("id", company.id);
     return NextResponse.json({ error: `HR user তৈরি ব্যর্থ: ${userError.message}` }, { status: 500 });
   }
