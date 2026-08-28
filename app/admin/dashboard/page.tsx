@@ -1,9 +1,9 @@
+import Link from "next/link";
 import { createSupabaseServerClient } from "@/lib/supabase-server";
 
 export default async function AdminDashboardPage() {
   const supabase = createSupabaseServerClient();
 
-  // is_super_admin() পলিসির কারণে এই ইউজার সব company দেখতে পারবে
   const { data: companies } = await supabase
     .from("companies")
     .select("id, name, subscription_plan, subscription_status, created_at")
@@ -11,7 +11,15 @@ export default async function AdminDashboardPage() {
 
   return (
     <main style={{ padding: 40, maxWidth: 800, margin: "0 auto" }}>
-      <h1 style={{ fontSize: 22 }}>Super Admin — All Companies</h1>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <h1 style={{ fontSize: 22 }}>Super Admin — All Companies</h1>
+        <Link
+          href="/admin/dashboard/add-company"
+          style={{ padding: "8px 16px", background: "#111", color: "#fff", borderRadius: 6, textDecoration: "none", fontSize: 14 }}
+        >
+          + Add Company
+        </Link>
+      </div>
 
       <table style={{ width: "100%", marginTop: 24, borderCollapse: "collapse" }}>
         <thead>
@@ -29,6 +37,13 @@ export default async function AdminDashboardPage() {
               <td style={{ padding: 8 }}>{c.subscription_status}</td>
             </tr>
           ))}
+          {(!companies || companies.length === 0) && (
+            <tr>
+              <td colSpan={3} style={{ padding: 16, color: "#888", textAlign: "center" }}>
+                এখনো কোনো company নেই — "+ Add Company" দিয়ে প্রথমটা যোগ করুন
+              </td>
+            </tr>
+          )}
         </tbody>
       </table>
     </main>
