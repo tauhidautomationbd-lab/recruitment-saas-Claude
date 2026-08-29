@@ -3,10 +3,6 @@ import { createSupabaseAdminClient } from "@/lib/supabase-admin";
 import { sendReminderEmail } from "@/lib/email";
 import { sendSMS } from "@/lib/sms";
 
-// Vercel Cron প্রতিদিন এই route-টা call করবে (vercel.json এ schedule সেট করা আছে)।
-// CRON_SECRET env variable সেট থাকলে Vercel নিজেই Authorization header এ পাঠায়,
-// এতে বাইরের কেউ এই endpoint সরাসরি call করে spam করতে পারবে না।
-
 export async function GET(request: NextRequest) {
   const authHeader = request.headers.get("authorization");
   if (process.env.CRON_SECRET && authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
@@ -27,34 +23,45 @@ export async function GET(request: NextRequest) {
   }
 
   const remindersSent: string[] = [];
+  const remindersFailed: { name: string; reason: string }[] = [];
 
   for (const company of expiredCompanies || []) {
-    // একই দিনে দুইবার reminder না পাঠানোর জন্য
     const alreadySentToday = company.last_reminder_sent_at?.slice(0, 10) === today;
     if (alreadySentToday) continue;
 
     const message = `${company.name}, আপনার Recruitment Platform সাবস্ক্রিপশনের মেয়াদ ${company.subscription_end_date} তারিখে শেষ হয়েছে। সেবা চালু রাখতে renew করুন।`;
 
+    let emailOk = true;
+    let emailErrorReason = "";
+
     if (company.contact_email) {
-      await sendReminderEmail(company.contact_email, company.name, company.subscription_end_date);
+      const result = await sendReminderEmail(company.contact_email, company.name, company.subscription_end_date);
+      if (result.error) {
+        emailOk = false;
+        emailErrorReason = String(result.error);
+      }
     }
 
     if (company.contact_phone) {
       try {
         await sendSMS(company.contact_phone, message);
       } catch (e) {
-        // SMS provider এখনো configure করা না থাকলে এখানে শুধু log হবে, পুরো cron job থামবে না
         console.log(`SMS পাঠানো যায়নি (${company.name}):`, e);
       }
     }
 
-    await admin
-      .from("companies")
-      .update({ last_reminder_sent_at: new Date().toISOString() })
-      .eq("id", company.id);
-
-    remindersSent.push(company.name);
+    // শুধু email সফল হলেই (বা contact_email না থাকলে) last_reminder_sent_at আপডেট করছি —
+    // ব্যর্থ হলে পরের বার আবার চেষ্টা করবে, silently "sent" mark হবে না
+    if (emailOk) {
+      await admin
+        .from("companies")
+        .update({ last_reminder_sent_at: new Date().toISOString() })
+        .eq("id", company.id);
+      remindersSent.push(company.name);
+    } else {
+      remindersFailed.push({ name: company.name, reason: emailErrorReason });
+    }
   }
 
-  return NextResponse.json({ remindersSent });
+  return NextResponse.json({ remindersSent, remindersFailed });
 }
