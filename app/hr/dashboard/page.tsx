@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { createSupabaseServerClient } from "@/lib/supabase-server";
 
 export default async function HrDashboardPage() {
@@ -19,10 +20,9 @@ export default async function HrDashboardPage() {
     .eq("id", profile?.company_id)
     .single();
 
-  // এই query RLS-এর কারণে শুধু নিজের company-র jobs-ই ফেরত দেবে
   const { data: jobs } = await supabase
     .from("jobs")
-    .select("id, title, status, created_at")
+    .select("id, title, status, created_at, applications(count)")
     .order("created_at", { ascending: false });
 
   return (
@@ -32,17 +32,31 @@ export default async function HrDashboardPage() {
         স্বাগতম, {profile?.full_name} ({profile?.role}) — Plan: {company?.subscription_plan}
       </p>
 
-      <h2 style={{ fontSize: 18, marginTop: 32 }}>Job Postings</h2>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 32 }}>
+        <h2 style={{ fontSize: 18, margin: 0 }}>Job Postings</h2>
+        <Link
+          href="/hr/dashboard/jobs/new"
+          style={{ padding: "8px 16px", background: "#111", color: "#fff", borderRadius: 6, textDecoration: "none", fontSize: 14 }}
+        >
+          + Post New Job
+        </Link>
+      </div>
+
       {jobs && jobs.length > 0 ? (
-        <ul>
-          {jobs.map((job) => (
-            <li key={job.id} style={{ padding: "8px 0", borderBottom: "1px solid #eee" }}>
-              {job.title} — <span style={{ color: "#888" }}>{job.status}</span>
+        <ul style={{ listStyle: "none", padding: 0 }}>
+          {jobs.map((job: any) => (
+            <li key={job.id} style={{ padding: "12px 0", borderBottom: "1px solid #eee" }}>
+              <Link href={`/hr/dashboard/jobs/${job.id}`} style={{ color: "#111", textDecoration: "none" }}>
+                <strong>{job.title}</strong>
+              </Link>
+              <span style={{ color: "#888", marginLeft: 8 }}>
+                {job.status} — {job.applications?.[0]?.count || 0} candidate(s)
+              </span>
             </li>
           ))}
         </ul>
       ) : (
-        <p style={{ color: "#888" }}>এখনো কোনো job posting নেই।</p>
+        <p style={{ color: "#888" }}>এখনো কোনো job posting নেই — "+ Post New Job" দিয়ে প্রথমটা তৈরি করুন।</p>
       )}
     </main>
   );
