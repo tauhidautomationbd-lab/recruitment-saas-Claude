@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { createSupabaseServerClient } from "@/lib/supabase-server";
+import CvLink from "./CvLink";
 
 export default async function JobDetailPage({ params }: { params: { jobId: string } }) {
   const supabase = createSupabaseServerClient();
@@ -64,7 +65,7 @@ export default async function JobDetailPage({ params }: { params: { jobId: strin
               <td style={{ padding: 8 }}>{app.stage}</td>
               <td style={{ padding: 8 }}>
                 {app.candidates?.cv_file_url ? (
-                  <span style={{ color: "#0070f3" }}>ফাইল আছে</span>
+                  <CvLink storagePath={app.candidates.cv_file_url} />
                 ) : (
                   "-"
                 )}
