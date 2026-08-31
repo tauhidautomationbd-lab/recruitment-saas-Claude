@@ -1,7 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabase-server";
 import { extractCvText } from "@/lib/cv-parse";
-import { screenCandidateWithAI } from "@/lib/openai";
+import { screenCandidateWithAI } from "@/lib/gemini";
 
 export async function POST(request: NextRequest, { params }: { params: { jobId: string } }) {
   const supabase = createSupabaseServerClient();

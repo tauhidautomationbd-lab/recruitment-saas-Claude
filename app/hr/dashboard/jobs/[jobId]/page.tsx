@@ -2,6 +2,7 @@ import Link from "next/link";
 import { createSupabaseServerClient } from "@/lib/supabase-server";
 import CvLink from "./CvLink";
 import RunScreeningButton from "./RunScreeningButton";
+import ApplicationActions from "./ApplicationActions";
 
 export default async function JobDetailPage({ params }: { params: { jobId: string } }) {
   const supabase = createSupabaseServerClient();
@@ -30,8 +31,19 @@ export default async function JobDetailPage({ params }: { params: { jobId: strin
 
   const pendingCount = (applications || []).filter((a: any) => a.stage === "applied").length;
 
+  const stageLabels: Record<string, string> = {
+    applied: "Applied",
+    screening: "Screened",
+    shortlisted: "Shortlisted",
+    interview: "Interview",
+    selected: "Selected",
+    rejected: "Rejected",
+    hired: "Hired",
+    no_show: "No Show",
+  };
+
   return (
-    <main style={{ padding: 40, maxWidth: 900, margin: "0 auto" }}>
+    <main style={{ padding: 40, maxWidth: 950, margin: "0 auto" }}>
       <Link href="/hr/dashboard" style={{ fontSize: 14, color: "#666" }}>
         ← সব Job-এ ফিরে যান
       </Link>
@@ -72,6 +84,7 @@ export default async function JobDetailPage({ params }: { params: { jobId: strin
             <th style={{ padding: 8 }}>Recommendation</th>
             <th style={{ padding: 8 }}>Stage</th>
             <th style={{ padding: 8 }}>CV</th>
+            <th style={{ padding: 8 }}>Action</th>
           </tr>
         </thead>
         <tbody>
@@ -87,16 +100,19 @@ export default async function JobDetailPage({ params }: { params: { jobId: strin
                 )}
               </td>
               <td style={{ padding: 8 }}>{app.ai_score !== null ? `${app.ai_score}/100` : "-"}</td>
-              <td style={{ padding: 8, maxWidth: 220 }}>{app.ai_recommendation || "-"}</td>
-              <td style={{ padding: 8 }}>{app.stage}</td>
+              <td style={{ padding: 8, maxWidth: 200 }}>{app.ai_recommendation || "-"}</td>
+              <td style={{ padding: 8 }}>{stageLabels[app.stage] || app.stage}</td>
               <td style={{ padding: 8 }}>
                 {app.candidates?.cv_file_url ? <CvLink storagePath={app.candidates.cv_file_url} /> : "-"}
+              </td>
+              <td style={{ padding: 8 }}>
+                <ApplicationActions applicationId={app.id} stage={app.stage} />
               </td>
             </tr>
           ))}
           {(!applications || applications.length === 0) && (
             <tr>
-              <td colSpan={5} style={{ padding: 16, color: "#888", textAlign: "center" }}>
+              <td colSpan={6} style={{ padding: 16, color: "#888", textAlign: "center" }}>
                 এখনো কোনো candidate আসেনি — "+ Bulk Upload CV" দিয়ে CV যোগ করুন
               </td>
             </tr>
