@@ -7,10 +7,12 @@ export default function RunScreeningButton({ jobId }: { jobId: string }) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
+  const [failures, setFailures] = useState<{ candidate: string; reason: string }[]>([]);
 
   async function handleClick() {
     setLoading(true);
     setMessage(null);
+    setFailures([]);
 
     const res = await fetch(`/api/hr/jobs/${jobId}/screen`, { method: "POST" });
     const result = await res.json();
@@ -24,6 +26,7 @@ export default function RunScreeningButton({ jobId }: { jobId: string }) {
     let msg = `${result.processed} জন candidate screen হয়েছে।`;
     if (result.failed?.length > 0) {
       msg += ` ${result.failed.length} জনের ক্ষেত্রে সমস্যা হয়েছে।`;
+      setFailures(result.failed);
     }
     setMessage(msg);
     router.refresh();
@@ -39,6 +42,15 @@ export default function RunScreeningButton({ jobId }: { jobId: string }) {
         {loading ? "AI Screening চলছে..." : "🤖 Run AI Screening"}
       </button>
       {message && <p style={{ fontSize: 13, color: "#666", marginTop: 6 }}>{message}</p>}
+      {failures.length > 0 && (
+        <ul style={{ fontSize: 12, color: "#c00", marginTop: 4, paddingLeft: 18 }}>
+          {failures.map((f, i) => (
+            <li key={i}>
+              {f.candidate}: {f.reason}
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }
