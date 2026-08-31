@@ -5,6 +5,7 @@ export async function extractCvText(buffer: Buffer, fileName: string): Promise<s
 
   if (lower.endsWith(".pdf")) {
     // debug-mode এড়াতে সরাসরি lib ফাইল থেকে import করা হচ্ছে
+    // @ts-ignore — এই সাব-পাথের জন্য pdf-parse কোনো TypeScript declaration দেয় না
     const pdfParse = (await import("pdf-parse/lib/pdf-parse.js")).default;
     const result = await pdfParse(buffer);
     return result.text || "";
