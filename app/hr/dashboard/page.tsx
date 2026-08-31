@@ -27,10 +27,17 @@ export default async function HrDashboardPage() {
 
   return (
     <main style={{ padding: 40, maxWidth: 720, margin: "0 auto" }}>
-      <h1 style={{ fontSize: 22 }}>{company?.name || "Your Company"}</h1>
-      <p style={{ color: "#666" }}>
-        স্বাগতম, {profile?.full_name} ({profile?.role}) — Plan: {company?.subscription_plan}
-      </p>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+        <div>
+          <h1 style={{ fontSize: 22 }}>{company?.name || "Your Company"}</h1>
+          <p style={{ color: "#666" }}>
+            স্বাগতম, {profile?.full_name} ({profile?.role}) — Plan: {company?.subscription_plan}
+          </p>
+        </div>
+        <Link href="/hr/dashboard/analytics" style={{ fontSize: 14, color: "#0070f3" }}>
+          📊 Analytics দেখুন
+        </Link>
+      </div>
 
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 32 }}>
         <h2 style={{ fontSize: 18, margin: 0 }}>Job Postings</h2>
