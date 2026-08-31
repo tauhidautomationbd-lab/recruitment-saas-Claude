@@ -18,7 +18,7 @@ export async function POST(request: NextRequest, { params }: { params: { applica
   const body = await request.json();
   const { stage } = body as { stage: string };
 
-  const allowedStages = ["shortlisted", "rejected", "screening"];
+  const allowedStages = ["shortlisted", "rejected", "screening", "selected"];
   if (!allowedStages.includes(stage)) {
     return NextResponse.json({ error: "অবৈধ stage" }, { status: 400 });
   }

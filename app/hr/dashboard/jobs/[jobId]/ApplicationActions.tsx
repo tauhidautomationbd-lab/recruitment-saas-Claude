@@ -56,5 +56,30 @@ export default function ApplicationActions({ applicationId, stage }: { applicati
     );
   }
 
+  if (stage === "interview") {
+    return (
+      <div style={{ display: "flex", gap: 6 }}>
+        <button
+          onClick={() => updateStage("selected")}
+          disabled={loading}
+          style={{ padding: "4px 10px", background: "#0a7d3c", color: "#fff", border: "none", borderRadius: 4, fontSize: 12, cursor: "pointer" }}
+        >
+          Select
+        </button>
+        <button
+          onClick={() => updateStage("rejected")}
+          disabled={loading}
+          style={{ padding: "4px 10px", background: "#c00", color: "#fff", border: "none", borderRadius: 4, fontSize: 12, cursor: "pointer" }}
+        >
+          Reject
+        </button>
+      </div>
+    );
+  }
+
+  if (stage === "no_show") {
+    return <span style={{ color: "#b58900", fontSize: 12 }}>Interview miss করেছে</span>;
+  }
+
   return null;
 }
