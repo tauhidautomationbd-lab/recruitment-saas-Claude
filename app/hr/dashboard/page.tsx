@@ -34,9 +34,14 @@ export default async function HrDashboardPage() {
             স্বাগতম, {profile?.full_name} ({profile?.role}) — Plan: {company?.subscription_plan}
           </p>
         </div>
-        <Link href="/hr/dashboard/analytics" style={{ fontSize: 14, color: "#0070f3" }}>
-          📊 Analytics দেখুন
-        </Link>
+        <div style={{ display: "flex", gap: 16 }}>
+          <Link href="/hr/dashboard/analytics" style={{ fontSize: 14, color: "#0070f3" }}>
+            📊 Analytics দেখুন
+          </Link>
+          <Link href="/hr/dashboard/audit-log" style={{ fontSize: 14, color: "#0070f3" }}>
+            📋 Audit Log
+          </Link>
+        </div>
       </div>
 
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 32 }}>

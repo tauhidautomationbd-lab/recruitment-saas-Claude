@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabase-server";
+import { logAudit } from "@/lib/audit";
 
 // এই route session-based client ব্যবহার করে (service-role না) —
 // তাই RLS নিজে থেকেই company isolation enforce করে; company_id এখানে
@@ -70,6 +71,17 @@ export async function POST(request: NextRequest) {
     }
 
     created++;
+  }
+
+  if (created > 0) {
+    await logAudit(supabase, {
+      companyId: profile.company_id,
+      actorUserId: user.id,
+      action: "candidates.bulk_uploaded",
+      targetType: "job",
+      targetId: jobId,
+      metadata: { count: created },
+    });
   }
 
   return NextResponse.json({ created, errors });

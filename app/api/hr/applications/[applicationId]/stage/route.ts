@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabase-server";
+import { logAudit } from "@/lib/audit";
 
 // এই route-ই "human approval layer" — AI শুধু recommend করে, কিন্তু
 // shortlist/reject-এর সিদ্ধান্ত এখানে HR ইউজার নিজে দেয়।
@@ -23,6 +24,12 @@ export async function POST(request: NextRequest, { params }: { params: { applica
     return NextResponse.json({ error: "অবৈধ stage" }, { status: 400 });
   }
 
+  const { data: existingApp } = await supabase
+    .from("applications")
+    .select("company_id, stage, candidates(full_name)")
+    .eq("id", params.applicationId)
+    .single();
+
   const updates: Record<string, any> = { stage };
 
   if (stage === "shortlisted") {
@@ -35,6 +42,21 @@ export async function POST(request: NextRequest, { params }: { params: { applica
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+
+  if (existingApp) {
+    await logAudit(supabase, {
+      companyId: existingApp.company_id,
+      actorUserId: user.id,
+      action: `application.${stage}`,
+      targetType: "application",
+      targetId: params.applicationId,
+      metadata: {
+        candidateName: (existingApp as any).candidates?.full_name,
+        fromStage: existingApp.stage,
+        toStage: stage,
+      },
+    });
   }
 
   return NextResponse.json({ success: true });

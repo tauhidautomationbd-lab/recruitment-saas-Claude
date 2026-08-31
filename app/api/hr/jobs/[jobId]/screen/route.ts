@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabase-server";
 import { extractCvText } from "@/lib/cv-parse";
 import { screenCandidateWithAI } from "@/lib/gemini";
+import { logAudit } from "@/lib/audit";
 
 export async function POST(request: NextRequest, { params }: { params: { jobId: string } }) {
   const supabase = createSupabaseServerClient();
@@ -92,6 +93,17 @@ export async function POST(request: NextRequest, { params }: { params: { jobId: 
     } catch (e: any) {
       failed.push({ candidate: candidate.full_name || candidate.id, reason: e.message });
     }
+  }
+
+  if (processed > 0 || failed.length > 0) {
+    await logAudit(supabase, {
+      companyId: job.company_id,
+      actorUserId: user.id,
+      action: "job.ai_screening_run",
+      targetType: "job",
+      targetId: params.jobId,
+      metadata: { processed, failedCount: failed.length },
+    });
   }
 
   return NextResponse.json({ processed, failed });

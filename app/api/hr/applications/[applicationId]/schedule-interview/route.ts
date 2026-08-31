@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabase-server";
+import { logAudit } from "@/lib/audit";
 
 export async function POST(request: NextRequest, { params }: { params: { applicationId: string } }) {
   const supabase = createSupabaseServerClient();
@@ -49,6 +50,15 @@ export async function POST(request: NextRequest, { params }: { params: { applica
   if (stageError) {
     return NextResponse.json({ error: stageError.message }, { status: 500 });
   }
+
+  await logAudit(supabase, {
+    companyId: profile.company_id,
+    actorUserId: user.id,
+    action: "interview.scheduled",
+    targetType: "application",
+    targetId: params.applicationId,
+    metadata: { scheduledAt, locationOrLink },
+  });
 
   return NextResponse.json({ success: true });
 }
