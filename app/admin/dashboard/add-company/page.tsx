@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { ui } from "@/lib/ui";
 
 export default function AddCompanyPage() {
   const router = useRouter();
@@ -10,9 +12,7 @@ export default function AddCompanyPage() {
   const [contactEmail, setContactEmail] = useState("");
   const [contactPhone, setContactPhone] = useState("");
   const [subscriptionPrice, setSubscriptionPrice] = useState("");
-  const [subscriptionStartDate, setSubscriptionStartDate] = useState(
-    new Date().toISOString().slice(0, 10)
-  );
+  const [subscriptionStartDate, setSubscriptionStartDate] = useState(new Date().toISOString().slice(0, 10));
   const [subscriptionEndDate, setSubscriptionEndDate] = useState("");
   const [hrFullName, setHrFullName] = useState("");
   const [hrEmail, setHrEmail] = useState("");
@@ -52,104 +52,94 @@ export default function AddCompanyPage() {
     }
 
     setSuccess(true);
-    setTimeout(() => router.push("/admin/dashboard"), 1500);
+    setTimeout(() => router.push("/admin/dashboard"), 1200);
   }
 
-  const inputStyle = { width: "100%", padding: 10, borderRadius: 6, border: "1px solid #ccc", marginTop: 4 };
-
   return (
-    <main style={{ padding: 40, maxWidth: 480, margin: "0 auto" }}>
-      <h1 style={{ fontSize: 20, marginBottom: 20 }}>নতুন Company যোগ করুন</h1>
+    <div className="mx-auto max-w-xl">
+      <Link href="/admin/dashboard" className="text-sm text-ink-500 hover:text-ink-700">
+        ← সব Company-তে ফিরে যান
+      </Link>
+      <h1 className={`${ui.pageTitle} mt-3 mb-6`}>নতুন Company যোগ করুন</h1>
 
-      <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-        <label>
-          Company নাম
-          <input value={companyName} onChange={(e) => setCompanyName(e.target.value)} required style={inputStyle} />
-        </label>
+      <form onSubmit={handleSubmit} className={`${ui.card} space-y-4`}>
+        <div>
+          <label className={ui.label}>Company নাম</label>
+          <input value={companyName} onChange={(e) => setCompanyName(e.target.value)} required className={ui.input} />
+        </div>
 
-        <label>
-          যোগাযোগের ইমেইল
-          <input type="email" value={contactEmail} onChange={(e) => setContactEmail(e.target.value)} style={inputStyle} />
-        </label>
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className={ui.label}>যোগাযোগের ইমেইল</label>
+            <input type="email" value={contactEmail} onChange={(e) => setContactEmail(e.target.value)} className={ui.input} />
+          </div>
+          <div>
+            <label className={ui.label}>যোগাযোগের ফোন</label>
+            <input value={contactPhone} onChange={(e) => setContactPhone(e.target.value)} placeholder="01XXXXXXXXX" className={ui.input} />
+          </div>
+        </div>
 
-        <label>
-          যোগাযোগের ফোন
-          <input value={contactPhone} onChange={(e) => setContactPhone(e.target.value)} style={inputStyle} placeholder="01XXXXXXXXX" />
-        </label>
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className={ui.label}>Subscription Plan</label>
+            <select value={subscriptionPlan} onChange={(e) => setSubscriptionPlan(e.target.value)} className={ui.input}>
+              <option value="trial">Trial</option>
+              <option value="basic">Basic</option>
+              <option value="pro">Pro</option>
+              <option value="enterprise">Enterprise</option>
+            </select>
+          </div>
+          <div>
+            <label className={ui.label}>প্যাকেজের মূল্য (টাকা)</label>
+            <input
+              type="number"
+              value={subscriptionPrice}
+              onChange={(e) => setSubscriptionPrice(e.target.value)}
+              placeholder="যেমন 5000"
+              className={ui.input}
+            />
+          </div>
+        </div>
 
-        <label>
-          Subscription Plan
-          <select value={subscriptionPlan} onChange={(e) => setSubscriptionPlan(e.target.value)} style={inputStyle}>
-            <option value="trial">Trial</option>
-            <option value="basic">Basic</option>
-            <option value="pro">Pro</option>
-            <option value="enterprise">Enterprise</option>
-          </select>
-        </label>
-
-        <label>
-          প্যাকেজের মূল্য (টাকা)
-          <input
-            type="number"
-            value={subscriptionPrice}
-            onChange={(e) => setSubscriptionPrice(e.target.value)}
-            style={inputStyle}
-            placeholder="যেমন 5000"
-          />
-        </label>
-
-        <div style={{ display: "flex", gap: 12 }}>
-          <label style={{ flex: 1 }}>
-            শুরুর তারিখ
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className={ui.label}>শুরুর তারিখ</label>
             <input
               type="date"
               value={subscriptionStartDate}
               onChange={(e) => setSubscriptionStartDate(e.target.value)}
-              style={inputStyle}
+              className={ui.input}
             />
-          </label>
-          <label style={{ flex: 1 }}>
-            শেষ হওয়ার তারিখ
-            <input
-              type="date"
-              value={subscriptionEndDate}
-              onChange={(e) => setSubscriptionEndDate(e.target.value)}
-              style={inputStyle}
-            />
-          </label>
+          </div>
+          <div>
+            <label className={ui.label}>শেষ হওয়ার তারিখ</label>
+            <input type="date" value={subscriptionEndDate} onChange={(e) => setSubscriptionEndDate(e.target.value)} className={ui.input} />
+          </div>
         </div>
 
-        <hr style={{ margin: "8px 0", border: "none", borderTop: "1px solid #eee" }} />
-        <p style={{ fontSize: 13, color: "#666", margin: 0 }}>
-          এই company-র প্রথম HR Admin ইউজার (তারা প্রথমবার লগইন করে আরও HR ইউজার যোগ করতে পারবে)
-        </p>
+        <hr className="border-ink-100" />
+        <p className="text-xs text-ink-500">এই company-র প্রথম HR Admin ইউজার</p>
 
-        <label>
-          HR-এর নাম
-          <input value={hrFullName} onChange={(e) => setHrFullName(e.target.value)} style={inputStyle} />
-        </label>
+        <div>
+          <label className={ui.label}>HR-এর নাম</label>
+          <input value={hrFullName} onChange={(e) => setHrFullName(e.target.value)} className={ui.input} />
+        </div>
+        <div>
+          <label className={ui.label}>HR-এর ইমেইল</label>
+          <input type="email" value={hrEmail} onChange={(e) => setHrEmail(e.target.value)} required className={ui.input} />
+        </div>
+        <div>
+          <label className={ui.label}>সাময়িক পাসওয়ার্ড</label>
+          <input type="text" value={hrPassword} onChange={(e) => setHrPassword(e.target.value)} required minLength={6} className={ui.input} />
+        </div>
 
-        <label>
-          HR-এর ইমেইল
-          <input type="email" value={hrEmail} onChange={(e) => setHrEmail(e.target.value)} required style={inputStyle} />
-        </label>
+        {error && <p className="text-sm text-red-600">{error}</p>}
+        {success && <p className="text-sm text-emerald-600">তৈরি হয়ে গেছে! Dashboard-এ ফেরত যাচ্ছি...</p>}
 
-        <label>
-          সাময়িক পাসওয়ার্ড
-          <input type="text" value={hrPassword} onChange={(e) => setHrPassword(e.target.value)} required minLength={6} style={inputStyle} />
-        </label>
-
-        {error && <p style={{ color: "red", fontSize: 14 }}>{error}</p>}
-        {success && <p style={{ color: "green", fontSize: 14 }}>তৈরি হয়ে গেছে! Dashboard-এ ফেরত যাচ্ছি...</p>}
-
-        <button
-          type="submit"
-          disabled={loading}
-          style={{ padding: 12, borderRadius: 6, background: "#111", color: "#fff", border: "none", marginTop: 8 }}
-        >
+        <button type="submit" disabled={loading} className={`${ui.btnPrimary} w-full`}>
           {loading ? "তৈরি হচ্ছে..." : "Company তৈরি করুন"}
         </button>
       </form>
-    </main>
+    </div>
   );
 }

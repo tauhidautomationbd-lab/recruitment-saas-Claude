@@ -1,11 +1,11 @@
 import Link from "next/link";
 import { createSupabaseServerClient } from "@/lib/supabase-server";
+import { ui } from "@/lib/ui";
 
 function isExpired(endDate: string | null) {
   if (!endDate) return false;
   return new Date(endDate) < new Date();
 }
-
 function isExpiringSoon(endDate: string | null) {
   if (!endDate) return false;
   const days = (new Date(endDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24);
@@ -23,60 +23,72 @@ export default async function AdminDashboardPage() {
     .order("created_at", { ascending: false });
 
   return (
-    <main style={{ padding: 40, maxWidth: 1100, margin: "0 auto" }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <h1 style={{ fontSize: 22 }}>Super Admin — All Companies</h1>
-        <Link
-          href="/admin/dashboard/add-company"
-          style={{ padding: "8px 16px", background: "#111", color: "#fff", borderRadius: 6, textDecoration: "none", fontSize: 14 }}
-        >
+    <div>
+      <div className="mb-8 flex items-center justify-between">
+        <div>
+          <h1 className={ui.pageTitle}>সব কোম্পানি</h1>
+          <p className="mt-1 text-sm text-ink-500">{companies?.length || 0}টা active client</p>
+        </div>
+        <Link href="/admin/dashboard/add-company" className={ui.btnPrimary}>
           + Add Company
         </Link>
       </div>
 
-      <table style={{ width: "100%", marginTop: 24, borderCollapse: "collapse", fontSize: 14 }}>
-        <thead>
-          <tr style={{ textAlign: "left", borderBottom: "2px solid #ddd" }}>
-            <th style={{ padding: 8 }}>Company</th>
-            <th style={{ padding: 8 }}>Plan</th>
-            <th style={{ padding: 8 }}>মূল্য</th>
-            <th style={{ padding: 8 }}>যোগাযোগ</th>
-            <th style={{ padding: 8 }}>মেয়াদ শেষ</th>
-            <th style={{ padding: 8 }}>Status</th>
-          </tr>
-        </thead>
-        <tbody>
-          {companies?.map((c) => {
-            const expired = isExpired(c.subscription_end_date);
-            const expiringSoon = isExpiringSoon(c.subscription_end_date);
-            return (
-              <tr key={c.id} style={{ borderBottom: "1px solid #eee" }}>
-                <td style={{ padding: 8 }}>{c.name}</td>
-                <td style={{ padding: 8 }}>{c.subscription_plan}</td>
-                <td style={{ padding: 8 }}>{c.subscription_price ? `৳${c.subscription_price}` : "-"}</td>
-                <td style={{ padding: 8 }}>
-                  {c.contact_email && <div>{c.contact_email}</div>}
-                  {c.contact_phone && <div style={{ color: "#666" }}>{c.contact_phone}</div>}
-                  {!c.contact_email && !c.contact_phone && "-"}
-                </td>
-                <td style={{ padding: 8, color: expired ? "#c00" : expiringSoon ? "#b58900" : "inherit" }}>
-                  {c.subscription_end_date || "-"}
-                  {expired && " (মেয়াদ শেষ)"}
-                  {!expired && expiringSoon && " (শীঘ্রই শেষ হবে)"}
-                </td>
-                <td style={{ padding: 8 }}>{c.subscription_status}</td>
-              </tr>
-            );
-          })}
-          {(!companies || companies.length === 0) && (
-            <tr>
-              <td colSpan={6} style={{ padding: 16, color: "#888", textAlign: "center" }}>
-                এখনো কোনো company নেই — "+ Add Company" দিয়ে প্রথমটা যোগ করুন
-              </td>
+      <div className="overflow-hidden rounded-xl border border-ink-200 bg-white">
+        <table className="w-full">
+          <thead>
+            <tr className="bg-ink-50">
+              <th className={ui.tableHeadCell}>Company</th>
+              <th className={ui.tableHeadCell}>Plan</th>
+              <th className={ui.tableHeadCell}>মূল্য</th>
+              <th className={ui.tableHeadCell}>যোগাযোগ</th>
+              <th className={ui.tableHeadCell}>মেয়াদ শেষ</th>
+              <th className={ui.tableHeadCell}>Status</th>
             </tr>
-          )}
-        </tbody>
-      </table>
-    </main>
+          </thead>
+          <tbody>
+            {companies?.map((c) => {
+              const expired = isExpired(c.subscription_end_date);
+              const expiringSoon = isExpiringSoon(c.subscription_end_date);
+              return (
+                <tr key={c.id} className={ui.tableRow}>
+                  <td className={`${ui.tableCell} font-medium text-ink-900`}>{c.name}</td>
+                  <td className={ui.tableCell}>
+                    <span className="rounded-full bg-ink-100 px-2.5 py-1 text-xs font-medium text-ink-700">
+                      {c.subscription_plan}
+                    </span>
+                  </td>
+                  <td className={ui.tableCell}>{c.subscription_price ? `৳${c.subscription_price}` : "—"}</td>
+                  <td className={`${ui.tableCell} text-xs`}>
+                    {c.contact_email && <div>{c.contact_email}</div>}
+                    {c.contact_phone && <div className="text-ink-500">{c.contact_phone}</div>}
+                    {!c.contact_email && !c.contact_phone && "—"}
+                  </td>
+                  <td className={ui.tableCell}>
+                    <span className={expired ? "text-red-600" : expiringSoon ? "text-amber-600" : "text-ink-700"}>
+                      {c.subscription_end_date || "—"}
+                      {expired && " (মেয়াদ শেষ)"}
+                      {!expired && expiringSoon && " (শীঘ্রই শেষ হবে)"}
+                    </span>
+                  </td>
+                  <td className={ui.tableCell}>
+                    <span className="rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-medium text-emerald-700">
+                      {c.subscription_status}
+                    </span>
+                  </td>
+                </tr>
+              );
+            })}
+            {(!companies || companies.length === 0) && (
+              <tr>
+                <td colSpan={6} className="px-4 py-10 text-center text-sm text-ink-500">
+                  এখনো কোনো company নেই — "+ Add Company" দিয়ে প্রথমটা যোগ করুন
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+    </div>
   );
 }

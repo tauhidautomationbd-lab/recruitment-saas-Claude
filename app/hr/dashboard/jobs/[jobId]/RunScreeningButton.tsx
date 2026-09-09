@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { ui } from "@/lib/ui";
 
 export default function RunScreeningButton({ jobId }: { jobId: string }) {
   const router = useRouter();
@@ -34,16 +35,12 @@ export default function RunScreeningButton({ jobId }: { jobId: string }) {
 
   return (
     <div>
-      <button
-        onClick={handleClick}
-        disabled={loading}
-        style={{ padding: "8px 16px", background: "#0070f3", color: "#fff", borderRadius: 6, border: "none", fontSize: 14, cursor: "pointer" }}
-      >
+      <button onClick={handleClick} disabled={loading} className={ui.btnPrimary}>
         {loading ? "AI Screening চলছে..." : "🤖 Run AI Screening"}
       </button>
-      {message && <p style={{ fontSize: 13, color: "#666", marginTop: 6 }}>{message}</p>}
+      {message && <p className="mt-2 text-xs text-ink-600">{message}</p>}
       {failures.length > 0 && (
-        <ul style={{ fontSize: 12, color: "#c00", marginTop: 4, paddingLeft: 18 }}>
+        <ul className="mt-1 list-inside list-disc space-y-0.5 text-xs text-red-600">
           {failures.map((f, i) => (
             <li key={i}>
               {f.candidate}: {f.reason}

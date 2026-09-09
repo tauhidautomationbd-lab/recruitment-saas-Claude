@@ -2,7 +2,9 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { createSupabaseBrowserClient } from "@/lib/supabase-browser";
+import { ui } from "@/lib/ui";
 
 export default function NewJobPage() {
   const router = useRouter();
@@ -19,8 +21,6 @@ export default function NewJobPage() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  const inputStyle = { width: "100%", padding: 10, borderRadius: 6, border: "1px solid #ccc", marginTop: 4 };
-
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
@@ -30,11 +30,7 @@ export default function NewJobPage() {
       data: { user },
     } = await supabase.auth.getUser();
 
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("company_id")
-      .eq("id", user!.id)
-      .single();
+    const { data: profile } = await supabase.from("profiles").select("company_id").eq("id", user!.id).single();
 
     if (!profile?.company_id) {
       setError("আপনার company profile পাওয়া যায়নি।");
@@ -70,66 +66,70 @@ export default function NewJobPage() {
   }
 
   return (
-    <main style={{ padding: 40, maxWidth: 600, margin: "0 auto" }}>
-      <h1 style={{ fontSize: 20, marginBottom: 20 }}>নতুন Job Posting তৈরি করুন</h1>
+    <div className="mx-auto max-w-xl">
+      <Link href="/hr/dashboard" className="text-sm text-ink-500 hover:text-ink-700">
+        ← Dashboard-এ ফিরে যান
+      </Link>
+      <h1 className={`${ui.pageTitle} mt-3 mb-6`}>নতুন Job Posting তৈরি করুন</h1>
 
-      <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-        <label>
-          Job Title
-          <input value={title} onChange={(e) => setTitle(e.target.value)} required style={inputStyle} />
-        </label>
+      <form onSubmit={handleSubmit} className={`${ui.card} space-y-4`}>
+        <div>
+          <label className={ui.label}>Job Title</label>
+          <input value={title} onChange={(e) => setTitle(e.target.value)} required className={ui.input} />
+        </div>
 
-        <label>
-          Description
-          <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={3} style={inputStyle} />
-        </label>
+        <div>
+          <label className={ui.label}>Description</label>
+          <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={3} className={ui.input} />
+        </div>
 
-        <label>
-          Responsibilities
-          <textarea value={responsibilities} onChange={(e) => setResponsibilities(e.target.value)} rows={3} style={inputStyle} />
-        </label>
+        <div>
+          <label className={ui.label}>Responsibilities</label>
+          <textarea
+            value={responsibilities}
+            onChange={(e) => setResponsibilities(e.target.value)}
+            rows={3}
+            className={ui.input}
+          />
+        </div>
 
-        <label>
-          Required Skills (কমা দিয়ে আলাদা করুন)
+        <div>
+          <label className={ui.label}>Required Skills (কমা দিয়ে আলাদা করুন)</label>
           <input
             value={requiredSkills}
             onChange={(e) => setRequiredSkills(e.target.value)}
             placeholder="যেমন: Excel, Communication, Sales"
-            style={inputStyle}
+            className={ui.input}
           />
-        </label>
-
-        <label>
-          Education
-          <input value={education} onChange={(e) => setEducation(e.target.value)} style={inputStyle} />
-        </label>
-
-        <label>
-          Location
-          <input value={location} onChange={(e) => setLocation(e.target.value)} style={inputStyle} />
-        </label>
-
-        <div style={{ display: "flex", gap: 12 }}>
-          <label style={{ flex: 1 }}>
-            Salary (Min)
-            <input type="number" value={salaryMin} onChange={(e) => setSalaryMin(e.target.value)} style={inputStyle} />
-          </label>
-          <label style={{ flex: 1 }}>
-            Salary (Max)
-            <input type="number" value={salaryMax} onChange={(e) => setSalaryMax(e.target.value)} style={inputStyle} />
-          </label>
         </div>
 
-        {error && <p style={{ color: "red", fontSize: 14 }}>{error}</p>}
+        <div>
+          <label className={ui.label}>Education</label>
+          <input value={education} onChange={(e) => setEducation(e.target.value)} className={ui.input} />
+        </div>
 
-        <button
-          type="submit"
-          disabled={loading}
-          style={{ padding: 12, borderRadius: 6, background: "#111", color: "#fff", border: "none", marginTop: 8 }}
-        >
+        <div>
+          <label className={ui.label}>Location</label>
+          <input value={location} onChange={(e) => setLocation(e.target.value)} className={ui.input} />
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className={ui.label}>Salary (Min)</label>
+            <input type="number" value={salaryMin} onChange={(e) => setSalaryMin(e.target.value)} className={ui.input} />
+          </div>
+          <div>
+            <label className={ui.label}>Salary (Max)</label>
+            <input type="number" value={salaryMax} onChange={(e) => setSalaryMax(e.target.value)} className={ui.input} />
+          </div>
+        </div>
+
+        {error && <p className="text-sm text-red-600">{error}</p>}
+
+        <button type="submit" disabled={loading} className={`${ui.btnPrimary} w-full`}>
           {loading ? "তৈরি হচ্ছে..." : "Job Post করুন"}
         </button>
       </form>
-    </main>
+    </div>
   );
 }

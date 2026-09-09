@@ -1,17 +1,7 @@
-import Link from "next/link";
 import { createSupabaseServerClient } from "@/lib/supabase-server";
+import { ui, stageLabel } from "@/lib/ui";
 
 const STAGE_ORDER = ["applied", "screening", "shortlisted", "interview", "selected", "hired", "rejected", "no_show"];
-const STAGE_LABELS: Record<string, string> = {
-  applied: "Applied",
-  screening: "Screened",
-  shortlisted: "Shortlisted",
-  interview: "Interview",
-  selected: "Selected",
-  hired: "Hired",
-  rejected: "Rejected",
-  no_show: "No Show",
-};
 
 export default async function AnalyticsPage() {
   const supabase = createSupabaseServerClient();
@@ -22,17 +12,16 @@ export default async function AnalyticsPage() {
 
   const apps = applications || [];
 
-  // ---------- Overall funnel ----------
   const funnel: Record<string, number> = {};
   for (const stage of STAGE_ORDER) funnel[stage] = 0;
-  for (const app of apps) {
-    funnel[app.stage] = (funnel[app.stage] || 0) + 1;
-  }
+  for (const app of apps) funnel[app.stage] = (funnel[app.stage] || 0) + 1;
 
   const totalApplied = apps.length;
 
-  // ---------- Per-job breakdown ----------
-  const jobStats: Record<string, { title: string; total: number; shortlisted: number; interview: number; selected: number; hired: number }> = {};
+  const jobStats: Record<
+    string,
+    { title: string; total: number; shortlisted: number; interview: number; selected: number; hired: number }
+  > = {};
   for (const app of apps) {
     const jobTitle = (app as any).jobs?.title || "Unknown Job";
     if (!jobStats[app.job_id]) {
@@ -45,7 +34,6 @@ export default async function AnalyticsPage() {
     if (app.stage === "hired") jobStats[app.job_id].hired++;
   }
 
-  // ---------- Time to hire (average days from applied to hired) ----------
   const hiredApps = apps.filter((a) => a.stage === "hired");
   let avgTimeToHireDays: number | null = null;
   if (hiredApps.length > 0) {
@@ -60,67 +48,65 @@ export default async function AnalyticsPage() {
   const pct = (n: number) => (totalApplied > 0 ? Math.round((n / totalApplied) * 100) : 0);
 
   return (
-    <main style={{ padding: 40, maxWidth: 900, margin: "0 auto" }}>
-      <Link href="/hr/dashboard" style={{ fontSize: 14, color: "#666" }}>
-        ← Dashboard-এ ফিরে যান
-      </Link>
-
-      <h1 style={{ fontSize: 22, marginTop: 12 }}>Recruitment Analytics</h1>
+    <div>
+      <h1 className={ui.pageTitle}>Recruitment Analytics</h1>
+      <p className="mt-1 text-sm text-ink-500">নিয়োগ প্রক্রিয়ার সার্বিক চিত্র</p>
 
       {totalApplied === 0 ? (
-        <p style={{ color: "#888", marginTop: 24 }}>এখনো কোনো candidate ডেটা নেই।</p>
+        <div className={`${ui.card} mt-8 text-center`}>
+          <p className="text-sm text-ink-500">এখনো কোনো candidate ডেটা নেই।</p>
+        </div>
       ) : (
         <>
-          <h2 style={{ fontSize: 16, marginTop: 32 }}>Overall Hiring Funnel ({totalApplied} total candidates)</h2>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 12, marginTop: 12 }}>
+          <h2 className={`${ui.sectionTitle} mt-8 mb-3`}>Overall Hiring Funnel — {totalApplied} candidates</h2>
+          <div className="grid grid-cols-4 gap-3">
             {STAGE_ORDER.map((stage) => (
-              <div
-                key={stage}
-                style={{ padding: "12px 16px", background: "#f7f7f7", borderRadius: 8, minWidth: 110, textAlign: "center" }}
-              >
-                <div style={{ fontSize: 20, fontWeight: "bold" }}>{funnel[stage]}</div>
-                <div style={{ fontSize: 12, color: "#666" }}>{STAGE_LABELS[stage]}</div>
-                <div style={{ fontSize: 11, color: "#999" }}>{pct(funnel[stage])}%</div>
+              <div key={stage} className={ui.cardFlat}>
+                <div className="text-2xl font-semibold text-ink-900">{funnel[stage]}</div>
+                <div className="mt-0.5 text-xs text-ink-600">{stageLabel[stage]}</div>
+                <div className="text-xs text-ink-400">{pct(funnel[stage])}%</div>
               </div>
             ))}
           </div>
 
-          <h2 style={{ fontSize: 16, marginTop: 32 }}>Time-to-Hire</h2>
-          <p style={{ marginTop: 8 }}>
-            {avgTimeToHireDays !== null
-              ? `গড়ে ${avgTimeToHireDays} দিন লাগছে (Applied → Hired), ${hiredApps.length} জন hired candidate-এর ভিত্তিতে।`
-              : "এখনো কোনো candidate hire করা হয়নি।"}
-          </p>
+          <h2 className={`${ui.sectionTitle} mt-8 mb-3`}>Time-to-Hire</h2>
+          <div className={ui.cardFlat}>
+            <p className="text-sm text-ink-700">
+              {avgTimeToHireDays !== null
+                ? `গড়ে ${avgTimeToHireDays} দিন লাগছে (Applied → Hired), ${hiredApps.length} জন hired candidate-এর ভিত্তিতে।`
+                : "এখনো কোনো candidate hire করা হয়নি।"}
+            </p>
+          </div>
 
-          <h2 style={{ fontSize: 16, marginTop: 32 }}>Job-wise Breakdown</h2>
-          <table style={{ width: "100%", marginTop: 12, borderCollapse: "collapse", fontSize: 14 }}>
-            <thead>
-              <tr style={{ textAlign: "left", borderBottom: "2px solid #ddd" }}>
-                <th style={{ padding: 8 }}>Job</th>
-                <th style={{ padding: 8 }}>Total</th>
-                <th style={{ padding: 8 }}>Shortlist Rate</th>
-                <th style={{ padding: 8 }}>Interview Rate</th>
-                <th style={{ padding: 8 }}>Selection Rate</th>
-                <th style={{ padding: 8 }}>Hired</th>
-              </tr>
-            </thead>
-            <tbody>
-              {Object.values(jobStats).map((job, i) => (
-                <tr key={i} style={{ borderBottom: "1px solid #eee" }}>
-                  <td style={{ padding: 8 }}>{job.title}</td>
-                  <td style={{ padding: 8 }}>{job.total}</td>
-                  <td style={{ padding: 8 }}>
-                    {job.total > 0 ? Math.round((job.shortlisted / job.total) * 100) : 0}%
-                  </td>
-                  <td style={{ padding: 8 }}>{job.total > 0 ? Math.round((job.interview / job.total) * 100) : 0}%</td>
-                  <td style={{ padding: 8 }}>{job.total > 0 ? Math.round((job.selected / job.total) * 100) : 0}%</td>
-                  <td style={{ padding: 8 }}>{job.hired}</td>
+          <h2 className={`${ui.sectionTitle} mt-8 mb-3`}>Job-wise Breakdown</h2>
+          <div className="overflow-hidden rounded-xl border border-ink-200 bg-white">
+            <table className="w-full">
+              <thead>
+                <tr className="bg-ink-50">
+                  <th className={ui.tableHeadCell}>Job</th>
+                  <th className={ui.tableHeadCell}>Total</th>
+                  <th className={ui.tableHeadCell}>Shortlist Rate</th>
+                  <th className={ui.tableHeadCell}>Interview Rate</th>
+                  <th className={ui.tableHeadCell}>Selection Rate</th>
+                  <th className={ui.tableHeadCell}>Hired</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {Object.values(jobStats).map((job, i) => (
+                  <tr key={i} className={ui.tableRow}>
+                    <td className={ui.tableCell}>{job.title}</td>
+                    <td className={ui.tableCell}>{job.total}</td>
+                    <td className={ui.tableCell}>{job.total > 0 ? Math.round((job.shortlisted / job.total) * 100) : 0}%</td>
+                    <td className={ui.tableCell}>{job.total > 0 ? Math.round((job.interview / job.total) * 100) : 0}%</td>
+                    <td className={ui.tableCell}>{job.total > 0 ? Math.round((job.selected / job.total) * 100) : 0}%</td>
+                    <td className={ui.tableCell}>{job.hired}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </>
       )}
-    </main>
+    </div>
   );
 }

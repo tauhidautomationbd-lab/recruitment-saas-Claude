@@ -2,7 +2,9 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { createSupabaseBrowserClient } from "@/lib/supabase-browser";
+import { ui } from "@/lib/ui";
 
 export default function BulkUploadPage({ params }: { params: { jobId: string } }) {
   const router = useRouter();
@@ -24,11 +26,7 @@ export default function BulkUploadPage({ params }: { params: { jobId: string } }
       data: { user },
     } = await supabase.auth.getUser();
 
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("company_id")
-      .eq("id", user!.id)
-      .single();
+    const { data: profile } = await supabase.from("profiles").select("company_id").eq("id", user!.id).single();
 
     if (!profile?.company_id) {
       setError("Company profile পাওয়া যায়নি।");
@@ -43,7 +41,6 @@ export default function BulkUploadPage({ params }: { params: { jobId: string } }
       setStatus(`Upload হচ্ছে: ${file.name} (${i + 1}/${files.length})`);
 
       const storagePath = `${profile.company_id}/${params.jobId}/${Date.now()}-${file.name}`;
-
       const { error: uploadError } = await supabase.storage.from("cvs").upload(storagePath, file);
 
       if (uploadError) {
@@ -75,33 +72,31 @@ export default function BulkUploadPage({ params }: { params: { jobId: string } }
   }
 
   return (
-    <main style={{ padding: 40, maxWidth: 480, margin: "0 auto" }}>
-      <h1 style={{ fontSize: 20, marginBottom: 20 }}>Bulk CV Upload</h1>
-      <p style={{ fontSize: 13, color: "#666", marginBottom: 20 }}>
-        একসাথে অনেকগুলো CV (PDF/DOC) সিলেক্ট করুন। প্রতিটার জন্য একটা candidate record তৈরি হবে —
-        নাম/ইমেইল পরে AI screening ধাপে CV থেকে বের করা হবে।
+    <div className="mx-auto max-w-md">
+      <Link href={`/hr/dashboard/jobs/${params.jobId}`} className="text-sm text-ink-500 hover:text-ink-700">
+        ← Job-এ ফিরে যান
+      </Link>
+      <h1 className={`${ui.pageTitle} mt-3 mb-2`}>Bulk CV Upload</h1>
+      <p className="mb-6 text-sm text-ink-500">
+        একসাথে অনেকগুলো CV (PDF/DOCX) সিলেক্ট করুন। পুরনো .doc ফরম্যাট সাপোর্ট করে না — .pdf বা .docx ব্যবহার করুন।
       </p>
 
-      <form onSubmit={handleUpload} style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+      <form onSubmit={handleUpload} className={`${ui.card} space-y-4`}>
         <input
           type="file"
           multiple
           accept=".pdf,.doc,.docx"
           onChange={(e) => setFiles(e.target.files)}
-          style={{ padding: 10, border: "1px solid #ccc", borderRadius: 6 }}
+          className="w-full rounded-md border border-ink-300 p-2.5 text-sm file:mr-3 file:rounded-md file:border-0 file:bg-brand-50 file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-brand-600 hover:file:bg-brand-100"
         />
 
-        {status && <p style={{ fontSize: 14, color: "#0070f3" }}>{status}</p>}
-        {error && <p style={{ fontSize: 14, color: "red" }}>{error}</p>}
+        {status && <p className="text-sm text-brand-600">{status}</p>}
+        {error && <p className="text-sm text-red-600">{error}</p>}
 
-        <button
-          type="submit"
-          disabled={uploading || !files}
-          style={{ padding: 12, borderRadius: 6, background: "#111", color: "#fff", border: "none" }}
-        >
+        <button type="submit" disabled={uploading || !files} className={`${ui.btnPrimary} w-full`}>
           {uploading ? "Upload হচ্ছে..." : "Upload শুরু করুন"}
         </button>
       </form>
-    </main>
+    </div>
   );
 }

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createSupabaseBrowserClient } from "@/lib/supabase-browser";
+import { ui } from "@/lib/ui";
 
 export default function ScheduleInterviewPage({ params }: { params: { applicationId: string } }) {
   const router = useRouter();
@@ -16,21 +17,16 @@ export default function ScheduleInterviewPage({ params }: { params: { applicatio
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  const inputStyle = { width: "100%", padding: 10, borderRadius: 6, border: "1px solid #ccc", marginTop: 4 };
-
   useEffect(() => {
     async function loadInterviewers() {
       const {
         data: { user },
       } = await supabase.auth.getUser();
-
       const { data: profile } = await supabase.from("profiles").select("company_id").eq("id", user!.id).single();
-
       const { data: teamMembers } = await supabase
         .from("profiles")
         .select("id, full_name")
         .eq("company_id", profile?.company_id);
-
       setInterviewers(teamMembers || []);
     }
     loadInterviewers();
@@ -61,34 +57,34 @@ export default function ScheduleInterviewPage({ params }: { params: { applicatio
   }
 
   return (
-    <main style={{ padding: 40, maxWidth: 480, margin: "0 auto" }}>
-      <h1 style={{ fontSize: 20, marginBottom: 20 }}>Interview Schedule করুন</h1>
+    <div className="mx-auto max-w-md">
+      <h1 className={`${ui.pageTitle} mb-6`}>Interview Schedule করুন</h1>
 
-      <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-        <div style={{ display: "flex", gap: 12 }}>
-          <label style={{ flex: 1 }}>
-            তারিখ
-            <input type="date" value={date} onChange={(e) => setDate(e.target.value)} required style={inputStyle} />
-          </label>
-          <label style={{ flex: 1 }}>
-            সময়
-            <input type="time" value={time} onChange={(e) => setTime(e.target.value)} required style={inputStyle} />
-          </label>
+      <form onSubmit={handleSubmit} className={`${ui.card} space-y-4`}>
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className={ui.label}>তারিখ</label>
+            <input type="date" value={date} onChange={(e) => setDate(e.target.value)} required className={ui.input} />
+          </div>
+          <div>
+            <label className={ui.label}>সময়</label>
+            <input type="time" value={time} onChange={(e) => setTime(e.target.value)} required className={ui.input} />
+          </div>
         </div>
 
-        <label>
-          Location / Meeting Link
+        <div>
+          <label className={ui.label}>Location / Meeting Link</label>
           <input
             value={locationOrLink}
             onChange={(e) => setLocationOrLink(e.target.value)}
             placeholder="অফিস ঠিকানা অথবা Zoom/Meet link"
-            style={inputStyle}
+            className={ui.input}
           />
-        </label>
+        </div>
 
-        <label>
-          Interviewer
-          <select value={interviewerId} onChange={(e) => setInterviewerId(e.target.value)} style={inputStyle}>
+        <div>
+          <label className={ui.label}>Interviewer</label>
+          <select value={interviewerId} onChange={(e) => setInterviewerId(e.target.value)} className={ui.input}>
             <option value="">-- নির্বাচন করুন (ঐচ্ছিক) --</option>
             {interviewers.map((person) => (
               <option key={person.id} value={person.id}>
@@ -96,18 +92,14 @@ export default function ScheduleInterviewPage({ params }: { params: { applicatio
               </option>
             ))}
           </select>
-        </label>
+        </div>
 
-        {error && <p style={{ color: "red", fontSize: 14 }}>{error}</p>}
+        {error && <p className="text-sm text-red-600">{error}</p>}
 
-        <button
-          type="submit"
-          disabled={loading}
-          style={{ padding: 12, borderRadius: 6, background: "#111", color: "#fff", border: "none", marginTop: 8 }}
-        >
+        <button type="submit" disabled={loading} className={`${ui.btnPrimary} w-full`}>
           {loading ? "সেভ হচ্ছে..." : "Interview Confirm করুন"}
         </button>
       </form>
-    </main>
+    </div>
   );
 }

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { ui } from "@/lib/ui";
 
 export default function ApplicationActions({ applicationId, stage }: { applicationId: string; stage: string }) {
   const router = useRouter();
@@ -26,19 +27,11 @@ export default function ApplicationActions({ applicationId, stage }: { applicati
 
   if (stage === "screening") {
     return (
-      <div style={{ display: "flex", gap: 6 }}>
-        <button
-          onClick={() => updateStage("shortlisted")}
-          disabled={loading}
-          style={{ padding: "4px 10px", background: "#0a7d3c", color: "#fff", border: "none", borderRadius: 4, fontSize: 12, cursor: "pointer" }}
-        >
+      <div className="flex gap-2">
+        <button onClick={() => updateStage("shortlisted")} disabled={loading} className={ui.btnSuccess}>
           Shortlist
         </button>
-        <button
-          onClick={() => updateStage("rejected")}
-          disabled={loading}
-          style={{ padding: "4px 10px", background: "#c00", color: "#fff", border: "none", borderRadius: 4, fontSize: 12, cursor: "pointer" }}
-        >
+        <button onClick={() => updateStage("rejected")} disabled={loading} className={ui.btnDanger}>
           Reject
         </button>
       </div>
@@ -49,7 +42,7 @@ export default function ApplicationActions({ applicationId, stage }: { applicati
     return (
       <Link
         href={`/hr/dashboard/applications/${applicationId}/interview`}
-        style={{ padding: "4px 10px", background: "#0070f3", color: "#fff", borderRadius: 4, fontSize: 12, textDecoration: "none" }}
+        className="inline-flex items-center rounded-md bg-brand-500 px-3 py-1.5 text-xs font-medium text-white hover:bg-brand-600"
       >
         Schedule Interview
       </Link>
@@ -58,19 +51,11 @@ export default function ApplicationActions({ applicationId, stage }: { applicati
 
   if (stage === "interview") {
     return (
-      <div style={{ display: "flex", gap: 6 }}>
-        <button
-          onClick={() => updateStage("selected")}
-          disabled={loading}
-          style={{ padding: "4px 10px", background: "#0a7d3c", color: "#fff", border: "none", borderRadius: 4, fontSize: 12, cursor: "pointer" }}
-        >
+      <div className="flex gap-2">
+        <button onClick={() => updateStage("selected")} disabled={loading} className={ui.btnSuccess}>
           Select
         </button>
-        <button
-          onClick={() => updateStage("rejected")}
-          disabled={loading}
-          style={{ padding: "4px 10px", background: "#c00", color: "#fff", border: "none", borderRadius: 4, fontSize: 12, cursor: "pointer" }}
-        >
+        <button onClick={() => updateStage("rejected")} disabled={loading} className={ui.btnDanger}>
           Reject
         </button>
       </div>
@@ -78,8 +63,8 @@ export default function ApplicationActions({ applicationId, stage }: { applicati
   }
 
   if (stage === "no_show") {
-    return <span style={{ color: "#b58900", fontSize: 12 }}>Interview miss করেছে</span>;
+    return <span className="text-xs text-orange-600">Interview miss করেছে</span>;
   }
 
-  return null;
+  return <span className="text-xs text-ink-400">—</span>;
 }

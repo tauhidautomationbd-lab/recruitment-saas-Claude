@@ -17,10 +17,7 @@ export default function CvLink({ storagePath }: { storagePath: string }) {
   }
 
   return (
-    <button
-      onClick={handleClick}
-      style={{ color: "#0070f3", background: "none", border: "none", padding: 0, cursor: "pointer", textDecoration: "underline", fontSize: 14 }}
-    >
+    <button onClick={handleClick} className="text-xs font-medium text-brand-600 underline hover:text-brand-700">
       CV দেখুন
     </button>
   );
