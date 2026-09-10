@@ -36,11 +36,11 @@ export default async function JobDetailPage({ params }: { params: { jobId: strin
 
   return (
     <div>
-      <Link href="/hr/dashboard" className="text-sm text-ink-500 hover:text-ink-700">
-        ← সব Job-এ ফিরে যান
+      <Link href="/hr/dashboard" className={ui.backLink}>
+        ← সব Job
       </Link>
 
-      <div className="mt-3 flex items-start justify-between">
+      <div className="flex items-start justify-between">
         <div>
           <h1 className={ui.pageTitle}>{job.title}</h1>
           <p className="mt-1 text-sm text-ink-500">

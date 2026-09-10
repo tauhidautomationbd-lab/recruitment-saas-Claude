@@ -67,10 +67,10 @@ export default function NewJobPage() {
 
   return (
     <div className="mx-auto max-w-xl">
-      <Link href="/hr/dashboard" className="text-sm text-ink-500 hover:text-ink-700">
-        ← Dashboard-এ ফিরে যান
+      <Link href="/hr/dashboard" className={ui.backLink}>
+        ← Dashboard
       </Link>
-      <h1 className={`${ui.pageTitle} mt-3 mb-6`}>নতুন Job Posting তৈরি করুন</h1>
+      <h1 className={`${ui.pageTitle} mb-6`}>নতুন Job Posting তৈরি করুন</h1>
 
       <form onSubmit={handleSubmit} className={`${ui.card} space-y-4`}>
         <div>

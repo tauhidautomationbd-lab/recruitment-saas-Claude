@@ -57,10 +57,10 @@ export default function AddCompanyPage() {
 
   return (
     <div className="mx-auto max-w-xl">
-      <Link href="/admin/dashboard" className="text-sm text-ink-500 hover:text-ink-700">
-        ← সব Company-তে ফিরে যান
+      <Link href="/admin/dashboard" className={ui.backLink}>
+        ← সব Company
       </Link>
-      <h1 className={`${ui.pageTitle} mt-3 mb-6`}>নতুন Company যোগ করুন</h1>
+      <h1 className={`${ui.pageTitle} mb-6`}>নতুন Company যোগ করুন</h1>
 
       <form onSubmit={handleSubmit} className={`${ui.card} space-y-4`}>
         <div>

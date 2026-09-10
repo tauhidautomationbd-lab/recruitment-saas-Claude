@@ -10,6 +10,7 @@ module.exports = {
           800: "#1E293B",
           700: "#334155",
           500: "#64748B",
+          400: "#94A3B8",
           300: "#CBD5E1",
           200: "#E2E8F0",
           100: "#F1F5F9",
@@ -30,9 +31,6 @@ module.exports = {
       },
       fontFamily: {
         sans: ["var(--font-inter)", "system-ui", "sans-serif"],
-      },
-      boxShadow: {
-        none: "none",
       },
     },
   },

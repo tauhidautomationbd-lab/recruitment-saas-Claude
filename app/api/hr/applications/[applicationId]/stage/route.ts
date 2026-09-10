@@ -3,7 +3,8 @@ import { createSupabaseServerClient } from "@/lib/supabase-server";
 import { logAudit } from "@/lib/audit";
 
 // এই route-ই "human approval layer" — AI শুধু recommend করে, কিন্তু
-// shortlist/reject-এর সিদ্ধান্ত এখানে HR ইউজার নিজে দেয়।
+// shortlist/reject-এর সিদ্ধান্ত এখানে HR ইউজার নিজে দেয়। Interviewer role-এর
+// এই action করার অনুমতি নেই (শুধু দেখতে পারবে)।
 
 export async function POST(request: NextRequest, { params }: { params: { applicationId: string } }) {
   const supabase = createSupabaseServerClient();
@@ -14,6 +15,12 @@ export async function POST(request: NextRequest, { params }: { params: { applica
 
   if (!user) {
     return NextResponse.json({ error: "লগইন করা নেই" }, { status: 401 });
+  }
+
+  const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single();
+
+  if (profile?.role === "interviewer") {
+    return NextResponse.json({ error: "Interviewer role-এর এই কাজের অনুমতি নেই" }, { status: 403 });
   }
 
   const body = await request.json();

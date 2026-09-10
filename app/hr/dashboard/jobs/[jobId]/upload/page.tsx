@@ -73,10 +73,10 @@ export default function BulkUploadPage({ params }: { params: { jobId: string } }
 
   return (
     <div className="mx-auto max-w-md">
-      <Link href={`/hr/dashboard/jobs/${params.jobId}`} className="text-sm text-ink-500 hover:text-ink-700">
-        ← Job-এ ফিরে যান
+      <Link href={`/hr/dashboard/jobs/${params.jobId}`} className={ui.backLink}>
+        ← Job
       </Link>
-      <h1 className={`${ui.pageTitle} mt-3 mb-2`}>Bulk CV Upload</h1>
+      <h1 className={`${ui.pageTitle} mb-2`}>Bulk CV Upload</h1>
       <p className="mb-6 text-sm text-ink-500">
         একসাথে অনেকগুলো CV (PDF/DOCX) সিলেক্ট করুন। পুরনো .doc ফরম্যাট সাপোর্ট করে না — .pdf বা .docx ব্যবহার করুন।
       </p>

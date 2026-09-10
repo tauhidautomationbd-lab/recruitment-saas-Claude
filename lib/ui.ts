@@ -11,6 +11,9 @@ export const ui = {
     "inline-flex items-center justify-center gap-2 rounded-md bg-accent-600 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-teal-700 disabled:cursor-not-allowed disabled:opacity-50",
   btnGhost:
     "inline-flex items-center justify-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium text-brand-600 transition-colors hover:bg-brand-50 disabled:cursor-not-allowed disabled:opacity-50",
+  // "ফিরে যান" লিংক — আগে হালকা ধূসর লেখা ছিল, এখন একটা স্পষ্ট চিপ/বাটনের মতো দেখাবে
+  backLink:
+    "mb-4 inline-flex items-center gap-1.5 rounded-md border border-ink-200 bg-white px-3 py-1.5 text-sm font-medium text-ink-700 transition-colors hover:border-ink-300 hover:bg-ink-50",
   card: "rounded-xl border border-ink-200 bg-white p-6",
   cardFlat: "rounded-lg border border-ink-200 bg-white p-4",
   input:
@@ -43,4 +46,18 @@ export const stageLabel: Record<string, string> = {
   hired: "Hired",
   rejected: "Rejected",
   no_show: "No Show",
+};
+
+export const roleLabel: Record<string, string> = {
+  company_admin: "Company Admin",
+  hr_manager: "HR Manager",
+  recruiter: "Recruiter",
+  interviewer: "Interviewer",
+};
+
+export const roleBadge: Record<string, string> = {
+  company_admin: "bg-brand-100 text-brand-700",
+  hr_manager: "bg-accent-100 text-accent-600",
+  recruiter: "bg-amber-100 text-amber-700",
+  interviewer: "bg-ink-100 text-ink-700",
 };

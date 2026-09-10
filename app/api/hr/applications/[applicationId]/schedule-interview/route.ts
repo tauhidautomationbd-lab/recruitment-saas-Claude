@@ -13,7 +13,11 @@ export async function POST(request: NextRequest, { params }: { params: { applica
     return NextResponse.json({ error: "লগইন করা নেই" }, { status: 401 });
   }
 
-  const { data: profile } = await supabase.from("profiles").select("company_id").eq("id", user.id).single();
+  const { data: profile } = await supabase.from("profiles").select("company_id, role").eq("id", user.id).single();
+
+  if (profile?.role === "interviewer") {
+    return NextResponse.json({ error: "Interviewer role-এর এই কাজের অনুমতি নেই" }, { status: 403 });
+  }
 
   if (!profile?.company_id) {
     return NextResponse.json({ error: "Company profile পাওয়া যায়নি" }, { status: 400 });

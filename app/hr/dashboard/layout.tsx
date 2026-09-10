@@ -1,13 +1,7 @@
 import { createSupabaseServerClient } from "@/lib/supabase-server";
 import SidebarNav from "./SidebarNav";
 import LogoutButton from "./LogoutButton";
-
-const ROLE_LABELS: Record<string, string> = {
-  company_admin: "Company Admin",
-  hr_manager: "HR Manager",
-  recruiter: "Recruiter",
-  interviewer: "Interviewer",
-};
+import { roleLabel } from "@/lib/ui";
 
 export default async function HrDashboardLayout({ children }: { children: React.ReactNode }) {
   const supabase = createSupabaseServerClient();
@@ -43,12 +37,12 @@ export default async function HrDashboardLayout({ children }: { children: React.
           </div>
         </div>
 
-        <SidebarNav />
+        <SidebarNav role={profile?.role} />
 
         <div className="mt-auto space-y-2 border-t border-ink-800 px-3 pt-4">
           <div className="px-3">
             <p className="truncate text-sm text-white">{profile?.full_name}</p>
-            <p className="text-xs text-ink-400">{ROLE_LABELS[profile?.role || ""] || profile?.role}</p>
+            <p className="text-xs text-ink-400">{roleLabel[profile?.role || ""] || profile?.role}</p>
           </div>
           <LogoutButton />
         </div>

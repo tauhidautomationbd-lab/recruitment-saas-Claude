@@ -2,10 +2,6 @@ import { NextResponse, type NextRequest } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabase-server";
 import { logAudit } from "@/lib/audit";
 
-// এই route session-based client ব্যবহার করে (service-role না) —
-// তাই RLS নিজে থেকেই company isolation enforce করে; company_id এখানে
-// client থেকে trust করা হয় না, বরং caller-এর profile থেকে server-side বের করা হয়।
-
 export async function POST(request: NextRequest) {
   const supabase = createSupabaseServerClient();
 
@@ -17,11 +13,11 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "লগইন করা নেই" }, { status: 401 });
   }
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("company_id")
-    .eq("id", user.id)
-    .single();
+  const { data: profile } = await supabase.from("profiles").select("company_id, role").eq("id", user.id).single();
+
+  if (profile?.role === "interviewer") {
+    return NextResponse.json({ error: "Interviewer role-এর এই কাজের অনুমতি নেই" }, { status: 403 });
+  }
 
   if (!profile?.company_id) {
     return NextResponse.json({ error: "Company profile পাওয়া যায়নি" }, { status: 400 });
@@ -38,8 +34,6 @@ export async function POST(request: NextRequest) {
   const errors: string[] = [];
 
   for (const file of files) {
-    // ফাইলের নাম থেকে extension বাদ দিয়ে সাময়িক নাম হিসেবে ব্যবহার —
-    // AI screening ধাপে CV parse করে আসল নাম/ইমেইল বসানো হবে
     const tentativeName = file.fileName.replace(/\.[^/.]+$/, "");
 
     const { data: candidate, error: candidateError } = await supabase

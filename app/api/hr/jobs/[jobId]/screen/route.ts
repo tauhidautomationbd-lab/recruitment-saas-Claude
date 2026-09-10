@@ -15,6 +15,12 @@ export async function POST(request: NextRequest, { params }: { params: { jobId: 
     return NextResponse.json({ error: "লগইন করা নেই" }, { status: 401 });
   }
 
+  const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single();
+
+  if (profile?.role === "interviewer") {
+    return NextResponse.json({ error: "Interviewer role-এর এই কাজের অনুমতি নেই" }, { status: 403 });
+  }
+
   const { data: job } = await supabase.from("jobs").select("*").eq("id", params.jobId).single();
 
   if (!job) {
@@ -47,12 +53,11 @@ export async function POST(request: NextRequest, { params }: { params: { jobId: 
       const text = await extractCvText(buffer, candidate.cv_file_url);
 
       if (!text || text.trim().length < 20) {
-        throw new Error("CV থেকে টেক্সট বের করা যায়নি (স্ক্যান করা ছবি হতে পারে)");
+        throw new Error("CV থেকে টেক্সট বের করা যায়নি (স্ক্যান করা ছবি অথবা পুরনো .doc ফরম্যাট হতে পারে)");
       }
 
       const result = await screenCandidateWithAI(text, job);
 
-      // একই company-তে একই email/phone দিয়ে আগে থেকে কোনো candidate আছে কিনা যাচাই
       let isDuplicateOf: string | null = null;
       if (result.email) {
         const { data: dupes } = await supabase
