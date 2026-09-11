@@ -75,7 +75,7 @@ export default async function JobDetailPage({ params }: { params: { jobId: strin
               <th className={ui.tableHeadCell}>Recommendation</th>
               <th className={ui.tableHeadCell}>Stage</th>
               <th className={ui.tableHeadCell}>CV</th>
-              {canManage && <th className={ui.tableHeadCell}>Action</th>}
+              <th className={ui.tableHeadCell}>Action</th>
             </tr>
           </thead>
           <tbody>
@@ -111,11 +111,9 @@ export default async function JobDetailPage({ params }: { params: { jobId: strin
                 <td className={ui.tableCell}>
                   {app.candidates?.cv_file_url ? <CvLink storagePath={app.candidates.cv_file_url} /> : "—"}
                 </td>
-                {canManage && (
-                  <td className={ui.tableCell}>
-                    <ApplicationActions applicationId={app.id} stage={app.stage} />
-                  </td>
-                )}
+                <td className={ui.tableCell}>
+                  <ApplicationActions applicationId={app.id} stage={app.stage} canManage={canManage} />
+                </td>
               </tr>
             ))}
             {(!applications || applications.length === 0) && (

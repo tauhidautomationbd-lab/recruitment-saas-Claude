@@ -5,7 +5,15 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ui } from "@/lib/ui";
 
-export default function ApplicationActions({ applicationId, stage }: { applicationId: string; stage: string }) {
+export default function ApplicationActions({
+  applicationId,
+  stage,
+  canManage,
+}: {
+  applicationId: string;
+  stage: string;
+  canManage: boolean;
+}) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
 
@@ -25,16 +33,25 @@ export default function ApplicationActions({ applicationId, stage }: { applicati
     }
   }
 
-  const emailLink = (
+  const emailLink = canManage ? (
     <Link
       href={`/hr/dashboard/applications/${applicationId}/compose-email`}
       className="text-xs font-medium text-brand-600 underline hover:text-brand-700"
     >
       ✉ Email
     </Link>
+  ) : null;
+
+  const questionsLink = (
+    <Link
+      href={`/hr/dashboard/applications/${applicationId}/interview-questions`}
+      className="text-xs font-medium text-accent-600 underline hover:text-teal-700"
+    >
+      🎯 Questions
+    </Link>
   );
 
-  if (stage === "screening") {
+  if (stage === "screening" && canManage) {
     return (
       <div className="flex flex-wrap items-center gap-2">
         <button onClick={() => updateStage("shortlisted")} disabled={loading} className={ui.btnSuccess}>
@@ -51,12 +68,15 @@ export default function ApplicationActions({ applicationId, stage }: { applicati
   if (stage === "shortlisted") {
     return (
       <div className="flex flex-wrap items-center gap-2">
-        <Link
-          href={`/hr/dashboard/applications/${applicationId}/interview`}
-          className="inline-flex items-center rounded-md bg-brand-500 px-3 py-1.5 text-xs font-medium text-white hover:bg-brand-600"
-        >
-          Schedule Interview
-        </Link>
+        {canManage && (
+          <Link
+            href={`/hr/dashboard/applications/${applicationId}/interview`}
+            className="inline-flex items-center rounded-md bg-brand-500 px-3 py-1.5 text-xs font-medium text-white hover:bg-brand-600"
+          >
+            Schedule Interview
+          </Link>
+        )}
+        {questionsLink}
         {emailLink}
       </div>
     );
@@ -65,18 +85,23 @@ export default function ApplicationActions({ applicationId, stage }: { applicati
   if (stage === "interview") {
     return (
       <div className="flex flex-wrap items-center gap-2">
-        <button onClick={() => updateStage("selected")} disabled={loading} className={ui.btnSuccess}>
-          Select
-        </button>
-        <button onClick={() => updateStage("rejected")} disabled={loading} className={ui.btnDanger}>
-          Reject
-        </button>
+        {canManage && (
+          <>
+            <button onClick={() => updateStage("selected")} disabled={loading} className={ui.btnSuccess}>
+              Select
+            </button>
+            <button onClick={() => updateStage("rejected")} disabled={loading} className={ui.btnDanger}>
+              Reject
+            </button>
+          </>
+        )}
+        {questionsLink}
         {emailLink}
       </div>
     );
   }
 
-  if (stage === "selected" || stage === "rejected") {
+  if ((stage === "selected" || stage === "rejected") && canManage) {
     return emailLink;
   }
 
