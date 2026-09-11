@@ -20,6 +20,36 @@ export default function NewJobPage() {
   const [salaryMax, setSalaryMax] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [generating, setGenerating] = useState(false);
+  const [genError, setGenError] = useState<string | null>(null);
+
+  async function handleGenerateJD() {
+    if (!title.trim()) {
+      setGenError("আগে Job Title লিখুন।");
+      return;
+    }
+    setGenerating(true);
+    setGenError(null);
+
+    const res = await fetch("/api/hr/jobs/generate-description", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ title }),
+    });
+
+    const result = await res.json();
+    setGenerating(false);
+
+    if (!res.ok) {
+      setGenError(result.error || "তৈরি করতে সমস্যা হয়েছে");
+      return;
+    }
+
+    setDescription(result.description || "");
+    setResponsibilities(result.responsibilities || "");
+    setRequiredSkills((result.requiredSkills || []).join(", "));
+    setEducation(result.education || "");
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -75,7 +105,19 @@ export default function NewJobPage() {
       <form onSubmit={handleSubmit} className={`${ui.card} space-y-4`}>
         <div>
           <label className={ui.label}>Job Title</label>
-          <input value={title} onChange={(e) => setTitle(e.target.value)} required className={ui.input} />
+          <div className="flex gap-2">
+            <input value={title} onChange={(e) => setTitle(e.target.value)} required className={ui.input} />
+            <button
+              type="button"
+              onClick={handleGenerateJD}
+              disabled={generating}
+              className={`${ui.btnSecondary} whitespace-nowrap`}
+            >
+              {generating ? "লেখা হচ্ছে..." : "🤖 AI দিয়ে লিখুন"}
+            </button>
+          </div>
+          {genError && <p className="mt-1 text-xs text-red-600">{genError}</p>}
+          <p className="mt-1 text-xs text-ink-500">Title লিখে বাটনে চাপলে AI বাকি অংশ (নিচে) নিজে লিখে দেবে — চাইলে edit করুন।</p>
         </div>
 
         <div>
@@ -88,7 +130,7 @@ export default function NewJobPage() {
           <textarea
             value={responsibilities}
             onChange={(e) => setResponsibilities(e.target.value)}
-            rows={3}
+            rows={4}
             className={ui.input}
           />
         </div>
