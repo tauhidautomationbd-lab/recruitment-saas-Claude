@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createSupabaseBrowserClient } from "@/lib/supabase-browser";
 import { ui } from "@/lib/ui";
@@ -77,6 +78,12 @@ export default function AdminLoginPage() {
           <button type="submit" disabled={loading} className={`${ui.btnPrimary} w-full`}>
             {loading ? "লগইন হচ্ছে..." : "Login"}
           </button>
+
+          <p className="text-center text-sm">
+            <Link href="/forgot-password" className="text-ink-400 hover:text-white hover:underline">
+              পাসওয়ার্ড ভুলে গেছেন?
+            </Link>
+          </p>
         </form>
       </div>
     </main>
