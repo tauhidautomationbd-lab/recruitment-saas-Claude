@@ -5,7 +5,7 @@
 export async function sendReminderEmail(to: string, companyName: string, endDate: string) {
   if (!process.env.RESEND_API_KEY) {
     console.log(`[Email not configured] Would send reminder to ${to} for ${companyName}`);
-    return { skipped: true };
+    return { skipped: true, error: null };
   }
 
   const res = await fetch("https://api.resend.com/emails", {
@@ -74,6 +74,37 @@ export async function sendInterviewReminderEmail(
   if (!res.ok) {
     const errText = await res.text();
     console.error("Interview reminder email পাঠানো ব্যর্থ:", errText);
+    return { skipped: false, error: errText };
+  }
+
+  return { skipped: false, error: null };
+}
+
+// candidate-কে যেকোনো custom email পাঠানোর জন্য generic function —
+// interview invitation, rejection, selection ইত্যাদি সব এটা দিয়েই পাঠানো হবে
+export async function sendCandidateEmail(to: string, subject: string, htmlBody: string) {
+  if (!process.env.RESEND_API_KEY) {
+    console.log(`[Email not configured] Would send to ${to}: ${subject}`);
+    return { skipped: true, error: null };
+  }
+
+  const res = await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      from: process.env.REMINDER_FROM_EMAIL || "onboarding@resend.dev",
+      to,
+      subject,
+      html: htmlBody,
+    }),
+  });
+
+  if (!res.ok) {
+    const errText = await res.text();
+    console.error("Candidate email পাঠানো ব্যর্থ:", errText);
     return { skipped: false, error: errText };
   }
 

@@ -25,41 +25,59 @@ export default function ApplicationActions({ applicationId, stage }: { applicati
     }
   }
 
+  const emailLink = (
+    <Link
+      href={`/hr/dashboard/applications/${applicationId}/compose-email`}
+      className="text-xs font-medium text-brand-600 underline hover:text-brand-700"
+    >
+      ✉ Email
+    </Link>
+  );
+
   if (stage === "screening") {
     return (
-      <div className="flex gap-2">
+      <div className="flex flex-wrap items-center gap-2">
         <button onClick={() => updateStage("shortlisted")} disabled={loading} className={ui.btnSuccess}>
           Shortlist
         </button>
         <button onClick={() => updateStage("rejected")} disabled={loading} className={ui.btnDanger}>
           Reject
         </button>
+        {emailLink}
       </div>
     );
   }
 
   if (stage === "shortlisted") {
     return (
-      <Link
-        href={`/hr/dashboard/applications/${applicationId}/interview`}
-        className="inline-flex items-center rounded-md bg-brand-500 px-3 py-1.5 text-xs font-medium text-white hover:bg-brand-600"
-      >
-        Schedule Interview
-      </Link>
+      <div className="flex flex-wrap items-center gap-2">
+        <Link
+          href={`/hr/dashboard/applications/${applicationId}/interview`}
+          className="inline-flex items-center rounded-md bg-brand-500 px-3 py-1.5 text-xs font-medium text-white hover:bg-brand-600"
+        >
+          Schedule Interview
+        </Link>
+        {emailLink}
+      </div>
     );
   }
 
   if (stage === "interview") {
     return (
-      <div className="flex gap-2">
+      <div className="flex flex-wrap items-center gap-2">
         <button onClick={() => updateStage("selected")} disabled={loading} className={ui.btnSuccess}>
           Select
         </button>
         <button onClick={() => updateStage("rejected")} disabled={loading} className={ui.btnDanger}>
           Reject
         </button>
+        {emailLink}
       </div>
     );
+  }
+
+  if (stage === "selected" || stage === "rejected") {
+    return emailLink;
   }
 
   if (stage === "no_show") {
