@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 
 const baseNavItems = [
   { href: "/hr/dashboard", label: "জব ও ক্যান্ডিডেট", icon: "📋", exact: true },
+  { href: "/hr/dashboard/talent-pool", label: "Talent Pool", icon: "⭐" },
   { href: "/hr/dashboard/analytics", label: "অ্যানালিটিক্স", icon: "📊" },
   { href: "/hr/dashboard/audit-log", label: "অডিট লগ", icon: "🕒" },
 ];

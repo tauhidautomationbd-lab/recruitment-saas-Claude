@@ -3,6 +3,7 @@ import { createSupabaseServerClient } from "@/lib/supabase-server";
 import CvLink from "./CvLink";
 import RunScreeningButton from "./RunScreeningButton";
 import ApplicationActions from "./ApplicationActions";
+import TalentPoolToggle from "./TalentPoolToggle";
 import { ui, stageBadge, stageLabel } from "@/lib/ui";
 
 export default async function JobDetailPage({ params }: { params: { jobId: string } }) {
@@ -23,7 +24,7 @@ export default async function JobDetailPage({ params }: { params: { jobId: strin
   const { data: applications } = await supabase
     .from("applications")
     .select(
-      "id, stage, ai_score, ai_recommendation, created_at, candidates(id, full_name, email, phone, cv_file_url, source, is_duplicate_of)"
+      "id, stage, ai_score, ai_recommendation, created_at, candidates(id, full_name, email, phone, cv_file_url, source, is_duplicate_of, in_talent_pool)"
     )
     .eq("job_id", params.jobId)
     .order("ai_score", { ascending: false, nullsFirst: false });
@@ -86,6 +87,11 @@ export default async function JobDetailPage({ params }: { params: { jobId: strin
                     <span className="ml-2 rounded bg-red-100 px-1.5 py-0.5 text-xs text-red-700">duplicate</span>
                   )}
                   {app.candidates?.email && <div className="text-xs text-ink-500">{app.candidates.email}</div>}
+                  {canManage && (
+                    <div className="mt-1">
+                      <TalentPoolToggle candidateId={app.candidates.id} inPool={!!app.candidates?.in_talent_pool} />
+                    </div>
+                  )}
                 </td>
                 <td className={ui.tableCell}>
                   {app.ai_score !== null ? (
